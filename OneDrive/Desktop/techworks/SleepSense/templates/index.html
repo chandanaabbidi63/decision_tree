@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SleepSense - AI-Powered Sleep Quality Predictor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"%3E%3Ccircle cx="50" cy="50" r="1" fill="white" opacity="0.8"%3E%3C/circle%3E%3Ccircle cx="150" cy="100" r="1.5" fill="white" opacity="0.6"%3E%3C/circle%3E%3Ccircle cx="100" cy="150" r="1" fill="white" opacity="0.9"%3E%3C/circle%3E%3C/svg%3E');
+            animation: twinkle 5s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+
+        .moon {
+            position: fixed;
+            top: 50px;
+            right: 100px;
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle at 30% 30%, #fff5d6, #ffd700);
+            border-radius: 50%;
+            box-shadow: 0 0 60px rgba(255, 215, 0, 0.6);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+            max-width: 700px;
+            width: 100%;
+            padding: 50px;
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo-icon {
+            font-size: 80px;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-top: 15px;
+            font-size: 3em;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-top: 10px;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.95em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .label-icon {
+            font-size: 1.2em;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            font-size: 1em;
+            transition: all 0.3s;
+            background: #f8f9fa;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .col {
+            flex: 1;
+        }
+
+        button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.2em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 15px;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(-1px);
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        #result {
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 20px;
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .sleep-score {
+            text-align: center;
+            font-size: 4em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 20px 0;
+            animation: scaleIn 0.6s;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .quality-indicator {
+            text-align: center;
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .suggestions {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+            white-space: pre-line;
+            line-height: 1.8;
+            font-size: 1em;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .error {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            padding: 18px;
+            border-radius: 15px;
+            margin-top: 20px;
+            font-weight: 500;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .loading {
+            text-align: center;
+            color: #667eea;
+            font-size: 1.2em;
+            font-weight: 600;
+            padding: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+            }
+            h1 {
+                font-size: 2.2em;
+            }
+            .row {
+                flex-direction: column;
+                gap: 0;
+            }
+            .moon {
+                width: 80px;
+                height: 80px;
+                right: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars"></div>
+    <div class="moon"></div>
+
+    <div class="container">
+        <div class="logo-section">
+            <div class="logo-icon">😴</div>
+            <h1>SleepSense</h1>
+            <p class="subtitle">✨ AI-Powered Sleep Quality Predictor ✨</p>
+        </div>
+
+        <form id="sleepForm">
+            <div class="row">
+                <div class="col form-group">
+                    <label for="gender"><span class="label-icon">👤</span> Gender</label>
+                    <select id="gender" name="gender" required>
+                        <option value="">Select</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+                <div class="col form-group">
+                    <label for="age"><span class="label-icon">🎂</span> Age</label>
+                    <input type="number" id="age" name="age" min="1" max="120" required placeholder="25">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="occupation"><span class="label-icon">💼</span> Occupation</label>
+                <select id="occupation" name="occupation" required>
+                    <option value="">Select Occupation</option>
+                    <option value="Software Engineer">Software Engineer</option>
+                    <option value="Doctor">Doctor</option>
+                    <option value="Teacher">Teacher</option>
+                    <option value="Nurse">Nurse</option>
+                    <option value="Sales Representative">Sales Representative</option>
+                    <option value="Accountant">Accountant</option>
+                    <option value="Engineer">Engineer</option>
+                    <option value="Lawyer">Lawyer</option>
+                    <option value="Manager">Manager</option>
+                    <option value="Student">Student</option>
+                </select>
+            </div>
+
+            <div class="row">
+                <div class="col form-group">
+                    <label for="sleep_duration"><span class="label-icon">⏰</span> Sleep Duration (hours)</label>
+                    <input type="number" id="sleep_duration" name="sleep_duration" step="0.1" min="1" max="12" required placeholder="7.5">
+                </div>
+                <div class="col form-group">
+                    <label for="physical_activity"><span class="label-icon">🏃</span> Physical Activity (min/day)</label>
+                    <input type="number" id="physical_activity" name="physical_activity" min="0" max="300" required placeholder="45">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col form-group">
+                    <label for="stress_level"><span class="label-icon">😰</span> Stress Level (1-10)</label>
+                    <input type="number" id="stress_level" name="stress_level" min="1" max="10" required placeholder="5">
+                </div>
+                <div class="col form-group">
+                    <label for="bmi_category"><span class="label-icon">⚖️</span> BMI Category</label>
+                    <select id="bmi_category" name="bmi_category" required>
+                        <option value="">Select</option>
+                        <option value="Normal">Normal</option>
+                        <option value="Normal Weight">Normal Weight</option>
+                        <option value="Overweight">Overweight</option>
+                        <option value="Obese">Obese</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col form-group">
+                    <label for="blood_pressure"><span class="label-icon">💓</span> Blood Pressure (systolic/diastolic)</label>
+                    <input type="text" id="blood_pressure" name="blood_pressure" pattern="\d{2,3}/\d{2,3}" required placeholder="120/80">
+                </div>
+                <div class="col form-group">
+                    <label for="heart_rate"><span class="label-icon">❤️</span> Heart Rate (bpm)</label>
+                    <input type="number" id="heart_rate" name="heart_rate" min="40" max="200" required placeholder="70">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col form-group">
+                    <label for="daily_steps"><span class="label-icon">👟</span> Daily Steps</label>
+                    <input type="number" id="daily_steps" name="daily_steps" min="0" max="50000" required placeholder="8000">
+                </div>
+                <div class="col form-group">
+                    <label for="sleep_disorder"><span class="label-icon">🏥</span> Sleep Disorder</label>
+                    <select id="sleep_disorder" name="sleep_disorder" required>
+                        <option value="">Select</option>
+                        <option value="None">None</option>
+                        <option value="Sleep Apnea">Sleep Apnea</option>
+                        <option value="Insomnia">Insomnia</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit">🌟 Analyze My Sleep Quality</button>
+        </form>
+
+        <div id="result">
+            <h2 style="text-align: center; color: #667eea; margin-bottom: 10px;">Your Sleep Quality Score</h2>
+            <div class="sleep-score" id="sleepScore"></div>
+            <div class="quality-indicator" id="qualityIndicator"></div>
+            <h3 style="color: #333; margin-bottom: 10px;">💡 Personalized Suggestions:</h3>
+            <div class="suggestions" id="suggestions"></div>
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+    </div>
+
+    <script>
+        document.getElementById('sleepForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const resultDiv = document.getElementById('result');
+            const errorDiv = document.getElementById('error');
+            const submitButton = document.querySelector('button[type="submit"]');
+
+            submitButton.disabled = true;
+            submitButton.textContent = '🔮 Analyzing...';
+            resultDiv.style.display = 'none';
+            errorDiv.style.display = 'none';
+
+            const formData = new FormData(this);
+            const data = {
+                gender: formData.get('gender'),
+                age: formData.get('age'),
+                occupation: formData.get('occupation'),
+                sleep_duration: formData.get('sleep_duration'),
+                physical_activity: formData.get('physical_activity'),
+                stress_level: formData.get('stress_level'),
+                bmi_category: formData.get('bmi_category'),
+                blood_pressure: formData.get('blood_pressure'),
+                heart_rate: formData.get('heart_rate'),
+                daily_steps: formData.get('daily_steps'),
+                sleep_disorder: formData.get('sleep_disorder')
+            };
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    document.getElementById('sleepScore').textContent = result.sleep_quality + '/10';
+                    document.getElementById('suggestions').textContent = result.suggestions;
+
+                    let emoji, color;
+                    if (result.sleep_quality >= 8) {
+                        emoji = '🌟 Excellent!';
+                        color = '#00b894';
+                    } else if (result.sleep_quality >= 6) {
+                        emoji = '😊 Good';
+                        color = '#fdcb6e';
+                    } else if (result.sleep_quality >= 4) {
+                        emoji = '😐 Fair';
+                        color = '#e17055';
+                    } else {
+                        emoji = '😞 Poor';
+                        color = '#d63031';
+                    }
+
+                    document.getElementById('qualityIndicator').innerHTML = emoji;
+                    document.getElementById('qualityIndicator').style.color = color;
+
+                    resultDiv.style.display = 'block';
+                    resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } else {
+                    throw new Error(result.error || 'Prediction failed');
+                }
+            } catch (error) {
+                errorDiv.textContent = '⚠️ ' + error.message;
+                errorDiv.style.display = 'block';
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = '🌟 Analyze My Sleep Quality';
+            }
+        });
+    </script>
+</body>
+</html>
